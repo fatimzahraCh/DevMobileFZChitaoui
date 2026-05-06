@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">QuizApp-ChitaouiMVP1</string>
+    <string name="question_count">Question %1$d/%2$d</string>
+    <string name="timer_format">00:%1$02d</string>
+    <string name="timer_zero">00:00</string>
+    <string name="select_answer">Veuillez sélectionner une réponse</string>
+    <string name="loading_questions">Chargement des questions...</string>
+    <string name="no_internet">Erreur de connexion internet</string>
+    <string name="no_questions">Aucune question trouvée dans la base</string>
+    <string name="time_up">Temps écoulé !</string>
+    <string name="correct_answer">Bonne réponse !</string>
+    <string name="wrong_answer">Mauvaise réponse !</string>
+    <string name="verification_success">Vérification réussie !</string>
+    <string name="error_recaptcha">Erreur reCAPTCHA : %1$s</string>
+    <string name="error_generic">Erreur : %1$s</string>
+    <string name="verify_robot">Veuillez confirmer que vous n\'êtes pas un robot</string>
+    <string name="verify_button">Vérifier avec reCAPTCHA</string>
+    <string name="btn_skip_verification">Se connecter directement (Timeout)</string>
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "628281081614",
+    "project_id": "quizapp-mvp",
+    "storage_bucket": "quizapp-mvp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:628281081614:android:5d5324a359c6b93a42e15f",
+        "android_client_info": {
+          "package_name": "com.example.quizapp_chitaouimvp1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA23K26qK-XFq1_r9k7UHRXIgKKV8gsYcs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

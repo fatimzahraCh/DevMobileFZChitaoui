@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    tools:context=".QuizActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/tvQst"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Question 1/30"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:10"
+            android:textColor="#FF0000"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#CCCCCC"
+        android:layout_marginBottom="16dp"/>
+
+    <ImageView
+        android:id="@+id/ivQuestionImage"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_marginBottom="16dp"
+        tools:src="@drawable/brain" />
+
+    <TextView
+        android:id="@+id/tvQuestionText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Trouvez la forme qui complète logiquement cette série :"
+        android:textSize="20sp"
+        android:textColor="#000000"
+        android:layout_marginBottom="24dp"/>
+
+    <RadioGroup
+        android:id="@+id/rgChoices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/rbChoice1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Option A"
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <RadioButton
+            android:id="@+id/rbChoice2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Option B"
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <RadioButton
+            android:id="@+id/rbChoice3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Option C"
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <RadioButton
+            android:id="@+id/rbChoice4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Option D"
+            android:textSize="18sp"
+            android:padding="12dp" />
+
+    </RadioGroup>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <Button
+        android:id="@+id/bNext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Valider"
+        android:textSize="18sp"
+        android:padding="16dp"/>
+    <Button
+        android:id="@+id/btnSpeak"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lire à voix haute" />
+</LinearLayout>
