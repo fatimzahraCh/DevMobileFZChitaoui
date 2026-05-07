@@ -1,80 +1,120 @@
 package com.example.quizapp_chitaouimvp1;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageProxy;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.safetynet.SafetyNet;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceDetection;
+import com.google.mlkit.vision.face.FaceDetector;
+import com.google.mlkit.vision.face.FaceDetectorOptions;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class VerificationActivity extends AppCompatActivity {
-
-    // Your reCAPTCHA Site Key
-    private static final String SITE_KEY = "6LfD1NMsAAAAAKfXd2G5ocT-lLcchurA1qky8X0t";
-
-    private Button btnSkip;
+    private PreviewView viewFinder;
+    private ExecutorService cameraExecutor;
+    private FaceDetector faceDetector;
+    private boolean isVerified = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verification);
 
-        Button btnVerify = findViewById(R.id.btnVerify);
-        btnSkip = findViewById(R.id.btnSkip);
+        viewFinder = findViewById(R.id.viewFinder);
+        cameraExecutor = Executors.newSingleThreadExecutor();
 
-        // Standard click for reCAPTCHA
-        btnVerify.setOnClickListener(v -> verifyWithRecaptcha());
+        FaceDetectorOptions options = new FaceDetectorOptions.Builder()
+                .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+                .build();
+        faceDetector = FaceDetection.getClient(options);
 
-        // Skip button click: goes directly to login
-        btnSkip.setOnClickListener(v -> {
-            Toast.makeText(this, "Redirection vers le login...", Toast.LENGTH_SHORT).show();
-            goToLogin();
-        });
-
-        // DEVELOPER BYPASS: Long click on verify button to skip immediately
-        btnVerify.setOnLongClickListener(v -> {
-            Toast.makeText(this, "Bypass mode activé (Dev)", Toast.LENGTH_SHORT).show();
-            goToLogin();
-            return true;
-        });
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            startCamera();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
+        }
     }
 
-    private void verifyWithRecaptcha() {
-        Toast.makeText(this, "Vérification en cours...", Toast.LENGTH_SHORT).show();
-        
-        SafetyNet.getClient(this).verifyWithRecaptcha(SITE_KEY)
-                .addOnSuccessListener(this, response -> {
-                    String userResponseToken = response.getTokenResult();
-                    if (userResponseToken != null && !userResponseToken.isEmpty()) {
-                        Toast.makeText(VerificationActivity.this, R.string.verification_success, Toast.LENGTH_SHORT).show();
-                        goToLogin();
-                    }
-                })
-                .addOnFailureListener(this, e -> {
-                    // Important: Show the skip button if it fails (e.g. TIMEOUT on emulator)
-                    btnSkip.setVisibility(View.VISIBLE);
-                    
-                    if (e instanceof ApiException) {
-                        ApiException apiException = (ApiException) e;
-                        int statusCode = apiException.getStatusCode();
-                        String errorMsg = getString(R.string.error_recaptcha, CommonStatusCodes.getStatusCodeString(statusCode));
-                        Toast.makeText(VerificationActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                    } else {
-                        String errorMsg = getString(R.string.error_generic, e.getMessage());
-                        Toast.makeText(VerificationActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                    }
+    private void startCamera() {
+        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+        cameraProviderFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                Preview preview = new Preview.Builder().build();
+                preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
+
+                ImageAnalysis analysis = new ImageAnalysis.Builder()
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build();
+
+                analysis.setAnalyzer(cameraExecutor, image -> {
+                    processImage(image);
                 });
+
+                // On s'assure qu'aucune autre caméra n'est liée avant de lancer celle-ci
+                cameraProvider.unbindAll();
+                cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_FRONT_CAMERA, preview, analysis);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, ContextCompat.getMainExecutor(this));
     }
 
-    private void goToLogin() {
-        // Redirect to Login screen (MainActivity)
-        Intent intent = new Intent(VerificationActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
+    // L'annotation OptIn corrige l'erreur rouge d'Android Studio
+    @androidx.annotation.OptIn(markerClass = androidx.camera.core.ExperimentalGetImage.class)
+    private void processImage(ImageProxy imageProxy) {
+        // La sécurité anti-crash : on vérifie que l'image existe bien
+        if (imageProxy.getImage() == null) {
+            imageProxy.close();
+            return;
+        }
+
+        InputImage image = InputImage.fromMediaImage(imageProxy.getImage(), imageProxy.getImageInfo().getRotationDegrees());
+        faceDetector.process(image).addOnSuccessListener(faces -> {
+            for (Face face : faces) {
+                if (face.getSmilingProbability() != null && face.getSmilingProbability() > 0.7f && !isVerified) {
+                    isVerified = true;
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Humain vérifié !", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(this, MainActivity.class));
+                        finish();
+                    });
+                }
+            }
+        }).addOnCompleteListener(task -> imageProxy.close());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 10 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startCamera();
+        } else {
+            Toast.makeText(this, "La permission caméra est requise pour vérifier votre identité.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        cameraExecutor.shutdown();
     }
 }

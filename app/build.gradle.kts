@@ -37,6 +37,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.play.services.mlkit.face.detection)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -49,6 +51,14 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
     implementation(libs.glide)
 
-    // SafetyNet pour reCAPTCHA
-    implementation("com.google.android.gms:play-services-safetynet:18.1.0")
+
+    // --- NOUVEAU : CameraX (Syntaxe Kotlin DSL avec 'val') ---
+    val camerax_version = "1.3.3"
+    implementation("androidx.camera:camera-core:$camerax_version")
+    implementation("androidx.camera:camera-camera2:$camerax_version")
+    implementation("androidx.camera:camera-lifecycle:$camerax_version")
+    implementation("androidx.camera:camera-view:$camerax_version")
+
+    // --- NOUVEAU : ML Kit (Syntaxe Kotlin DSL avec guillemets doubles) ---
+    implementation("com.google.mlkit:face-detection:16.1.6")
 }
